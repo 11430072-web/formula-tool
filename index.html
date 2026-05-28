@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>計算工具箱 | 公式+計算機</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'PingFang TC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: #f1f5f9;
+            margin: 0;
+            padding: 16px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin: 0 0 4px 0;
+            color: #0f172a;
+        }
+        .sub {
+            color: #475569;
+            border-left: 4px solid #3b82f6;
+            padding-left: 12px;
+            margin: 8px 0 20px 0;
+            font-size: 0.9rem;
+        }
+        /* 兩欄佈局：左邊計算器、右邊公式庫 */
+        .two-columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .calc-panel {
+            flex: 1.2;
+            min-width: 260px;
+            background: white;
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            height: fit-content;
+        }
+        .formula-panel {
+            flex: 2;
+            min-width: 280px;
+        }
+        .calc-card {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 8px 4px 8px 0;
+        }
+        .formula-select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 60px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            margin: 12px 0;
+        }
+        .input-group {
+            margin: 16px 0;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: #1e293b;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            font-size: 1rem;
+        }
+        .calc-btn {
+            background: #3b82f6;
+            width: 100%;
+            border: none;
+            padding: 12px;
+            border-radius: 60px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .result {
+            background: #e6f0ff;
+            padding: 14px;
+            border-radius: 20px;
+            margin-top: 16px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        .search-box {
+            background: white;
+            border-radius: 60px;
+            padding: 4px 4px 4px 18px;
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .search-box input {
+            flex: 1;
+            border: none;
+            padding: 10px 0;
+            outline: none;
+        }
+        .search-box button {
+            background: #1e293b;
+            border: none;
+            color: white;
+            padding: 6px 20px;
+            border-radius: 60px;
+            cursor: pointer;
+        }
+        .cats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .cat {
+            background: #e2e8f0;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .cat.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            border-left: 5px solid #3b82f6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .card-cat {
+            font-size: 0.7rem;
+            background: #e2e8f0;
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+        .card-name {
+            font-weight: 700;
+            margin: 8px 0 8px;
+        }
+        .donate {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 28px;
+            padding: 12px;
+            text-align: center;
+            margin-top: 24px;
+        }
+        .donate button {
+            background: #f59e0b;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 20px;
+            color: #5b6e8c;
+        }
+        @media (max-width: 750px) {
+            .two-columns { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🧮 計算工具箱</h1>
+    <div class="sub">內建公式庫 + 即時計算機｜二次方程・牛頓力學・動能・微積分</div>
+
+    <div class="two-columns">
+        <!-- 左側：計算機專區 -->
+        <div class="calc-panel">
+            <div style="font-size: 1.4rem; font-weight: 700;">📟 快速計算</div>
+            <div class="calc-card">
+                <select id="calcFormulaSelect" class="formula-select">
+                    <option value="quadratic">二次方程解 (求 x)</option>
+                    <option value="newton">牛頓第二定律 F = m·a</option>
+                    <option value="kinetic">動能 K = ½·m·v²</option>
+                    <option value="gravity">重力位能 U = m·g·h</option>
+                    <option value="ohm">歐姆定律 V = I·R</option>
+                    <option value="avg">平均數</option>
+                </select>
+
+                <div id="dynamicInputs"></div>
+
+                <button id="computeBtn" class="calc-btn">🧮 計算答案</button>
+                <div id="calcResult" class="result">等待計算...</div>
+            </div>
+        </div>
+
+        <!-- 右側：查公式區 -->
+        <div class="formula-panel">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜尋公式名稱或類別...">
+                <button id="searchBtn">搜尋</button>
+            </div>
+            <div class="cats" id="catButtons">
+                <button class="cat active" data-cat="all">全部</button>
+                <button class="cat" data-cat="數學">數學</button>
+                <button class="cat" data-cat="物理">物理</button>
+                <button class="cat" data-cat="微積分">微積分</button>
+                <button class="cat" data-cat="統計">統計</button>
+                <button class="cat" data-cat="線代">線代</button>
+            </div>
+            <div id="formulaContainer">載入公式中...</div>
+        </div>
+    </div>
+
+    <div class="donate">
+        🧪 16歲學生開發 · 可計算多種公式 <br>
+        <strong>👉 贊助 50 元</strong> 支持持續更新更多計算功能 🙌<br>
+        <button id="donateBtn">⚡ 贊助 50 元 (測試)</button>
+    </div>
+    <div class="footer">
+        ⚡ 陽春但能算｜二次方程・牛頓力學・動能・平均數｜持續增加計算類型
+    </div>
+</div>
+
+<script>
+    // ======================= 公式資料庫 (查詢用) ======================
+    const formulas = [
+        { name: "二次方程式解", cat: "數學", tex: "x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}" },
+        { name: "圓面積", cat: "數學", tex: "A = \\pi r^2" },
+        { name: "三角恆等式", cat: "數學", tex: "\\sin^2\\theta + \\cos^2\\theta = 1" },
+        { name: "牛頓第二定律", cat: "物理", tex: "F = ma" },
+        { name: "動能", cat: "物理", tex: "K = \\frac{1}{2}mv^2" },
+        { name: "重力位能", cat: "物理", tex: "U = mgh" },
+        { name: "歐姆定律", cat: "物理", tex: "V = IR" },
+        { name: "微分冪法則", cat: "微積分", tex: "\\frac{d}{dx}x^n = nx^{n-1}" },
+        { name: "積分冪法則", cat: "微積分", tex: "\\int x^n dx = \\frac{x^{n+1}}{n+1}+C" },
+        { name: "平均數", cat: "統計", tex: "\\bar{x} = \\frac{\\sum x_i}{n}" },
+        { name: "2x2行列式", cat: "線代", tex: "\\det\\begin{pmatrix} a&b \\\\ c&d \\end{pmatrix}=ad-bc" }
+    ];
+
+    let currentCat = "all";
+    let currentSearch = "";
+
+    function renderFormulas() {
+        let list = formulas;
+        if (currentCat !== "all") list = list.filter(f => f.cat === currentCat);
+        if (currentSearch.trim()) {
+            const kw = currentSearch.trim().toLowerCase();
+            list = list.filter(f => f.name.toLowerCase().includes(kw) || f.cat.toLowerCase().includes(kw));
+        }
+        const container = document.getElementById("formulaContainer");
+        if (list.length === 0) {
+            container.innerHTML = `<div style="padding:32px;text-align:center;">😢 沒有符合的公式</div>`;
+            return;
+        }
+        let html = "";
+        for (let f of list) {
+            html += `
+                <div class="card">
+                    <div><span class="card-cat">📁 ${f.cat}</span></div>
+                    <div class="card-name">📌 ${f.name}</div>
+                    <div>\\( ${f.tex} \\)</div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+        if (window.MathJax) MathJax.typesetPromise();
+    }
+
+    // ======================= 計算機動態輸入 ======================
+    function updateInputsByFormula() {
+        const select = document.getElementById("calcFormulaSelect");
+        const formula = select.value;
+        const container = document.getElementById("dynamicInputs");
+        if (formula === "quadratic") {
+            container.innerHTML = `
+                <div class="input-group"><label>a (二次項係數)</label><input type="number" id="a" step="any" value="1"></div>
+                <div class="input-group"><label>b (一次項係數)</label><input type="number" id="b" step="any" value="-3"></div>
+                <div class="input-group"><label>c (常數項)</label><input type="number" id="c" step="any" value="2"></div>
+            `;
+        } else if (formula === "newton") {
+            container.innerHTML = `
+                <div class="input-group"><label>質量 m (kg)</label><input type="number" id="m" step="any" value="5"></div>
+                <div class="input-group"><label>加速度 a (m/s²)</label><input type="number" id="a" step="any" value="2"></div>
+            `;
+        } else if (formula === "kinetic") {
+            container.innerHTML = `
+                <div class="input-group"><label>質量 m (kg)</label><input type="number" id="m" step="any" value="4"></div>
+                <div class="input-group"><label>速度 v (m/s)</label><input type="number" id="v" step="any" value="3"></div>
+            `;
+        } else if (formula === "gravity") {
+            container.innerHTML = `
+                <div class="input-group"><label>質量 m (kg)</label><input type="number" id="m" step="any" value="10"></div>
+                <div class="input-group"><label>高度 h (m)</label><input type="number" id="h" step="any" value="5"></div>
+                <div class="input-group"><label>重力加速度 g (m/s²)</label><input type="number" id="g" step="any" value="9.8"></div>
+            `;
+        } else if (formula === "ohm") {
+            container.innerHTML = `
+                <div class="input-group"><label>電流 I (A)</label><input type="number" id="i" step="any" value="2"></div>
+                <div class="input-group"><label>電阻 R (Ω)</label><input type="number" id="r" step="any" value="10"></div>
+            `;
+        } else if (formula === "avg") {
+            container.innerHTML = `
+                <div class="input-group"><label>數字 (用逗號分隔)</label><input type="text" id="numbers" placeholder="例如: 4,5,6,7" value="4,5,6"></div>
+            `;
+        }
+    }
+
+    function compute() {
+        const select = document.getElementById("calcFormulaSelect");
+        const formula = select.value;
+        let result = "";
+        try {
+            if (formula === "quadratic") {
+                let a = parseFloat(document.getElementById("a").value);
+                let b = parseFloat(document.getElementById("b").value);
+                let c = parseFloat(document.getElementById("c").value);
+                let delta = b*b - 4*a*c;
+                if (delta < 0) result = "無實數解 (Δ < 0)";
+                else {
+                    let x1 = (-b + Math.sqrt(delta)) / (2*a);
+                    let x2 = (-b - Math.sqrt(delta)) / (2*a);
+                    result = `x₁ = ${x1.toFixed(4)} , x₂ = ${x2.toFixed(4)}`;
+                }
+            } else if (formula === "newton") {
+                let m = parseFloat(document.getElementById("m").value);
+                let a = parseFloat(document.getElementById("a").value);
+                result = `F = ${m * a} N`;
+            } else if (formula === "kinetic") {
+                let m = parseFloat(document.getElementById("m").value);
+                let v = parseFloat(document.getElementById("v").value);
+                result = `K = ${0.5 * m * v * v} J`;
+            } else if (formula === "gravity") {
+                let m = parseFloat(document.getElementById("m").value);
+                let h = parseFloat(document.getElementById("h").value);
+                let g = parseFloat(document.getElementById("g").value);
+                result = `U = ${m * g * h} J`;
+            } else if (formula === "ohm") {
+                let i = parseFloat(document.getElementById("i").value);
+                let r = parseFloat(document.getElementById("r").value);
+                result = `V = ${i * r} V`;
+            } else if (formula === "avg") {
+                let text = document.getElementById("numbers").value;
+                let nums = text.split(",").map(x => parseFloat(x.trim())).filter(n => !isNaN(n));
+                if (nums.length === 0) result = "請輸入有效數字";
+                else {
+                    let sum = nums.reduce((a,b) => a + b, 0);
+                    result = `平均數 = ${(sum / nums.length).toFixed(4)}`;
+                }
+            }
+        } catch(e) { result = "輸入錯誤，請檢查數值"; }
+        document.getElementById("calcResult").innerHTML = `🧾 計算結果：${result}`;
+    }
+
+    // ========== 事件綁定 ==========
+    document.getElementById("calcFormulaSelect").addEventListener("change", updateInputsByFormula);
+    document.getElementById("computeBtn").addEventListener("click", compute);
+    updateInputsByFormula();
+
+    // 公式庫篩選
+    document.getElementById("searchBtn").onclick = () => {
+        currentSearch = document.getElementById("searchInput").value;
+        renderFormulas();
+    };
+    document.getElementById("searchInput").onkeyup = (e) => {
+        if (e.key === "Enter") {
+            currentSearch = e.target.value;
+            renderFormulas();
+        }
+    };
+    const catBtns = document.querySelectorAll(".cat");
+    catBtns.forEach(btn => {
+        btn.onclick = () => {
+            catBtns.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentCat = btn.getAttribute("data-cat");
+            renderFormulas();
+        };
+    });
+    document.getElementById("donateBtn").onclick = () => alert("🧧 測試模式。後續會串接綠界讓你實際贊助 50 元。");
+
+    renderFormulas();
+</script>
+</body>
+</html>
